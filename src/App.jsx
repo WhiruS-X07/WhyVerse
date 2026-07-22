@@ -1,8 +1,7 @@
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./layout/Layout";
-import { Home, Anime, Movies, TVShows } from "./components/component";
+import { Home, People, Movies, TVShows, Details, PersonDetails } from "./pages/pages";
 function App() {
-  
   const router = createBrowserRouter([
     {
       path: "/",
@@ -10,29 +9,37 @@ function App() {
       children: [
         {
           path: "",
-          element: <Home />
+          element: <Home />,
         },
         {
           path: "movies",
-          element: <Movies />
+          element: <Movies />,
         },
         {
-          path: "anime",
-          element: <Anime />
+          path: "people",
+          element: <People />,
         },
         {
           path: "tvshows",
-          element: <TVShows />
-        }
-      ]
-    }
+          element: <TVShows />,
+        },
+        {
+          path: "details/:type/:id",
+          element: <Details />,
+        },
+        {
+          path: "person/:id",
+          element: <PersonDetails />,
+        },
+      ],
+    },
   ]);
 
-  return (  
-   <>
-    <RouterProvider router={router} />
-   </>
-  )
+  return (
+    <>
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
-export default App
+export default App;
