@@ -76,72 +76,6 @@ export const getTVWatchProviders = async (tvShowId) => {
 };
 
 /* =========================
-   Images
-========================= */
-
-export const getMovieImages = async (movieId) => {
-  const data = await fetchData(
-    `/movie/${movieId}/images`
-  );
-
-  console.log(data);
-  return data;
-};
-
-export const getTVImages = async (tvShowId) => {
-  const data = await fetchData(
-    `/tv/${tvShowId}/images`
-  );
-
-  console.log(data);
-  return data;
-};
-
-/* =========================
-   Keywords
-========================= */
-
-export const getMovieKeywords = async (movieId) => {
-  const data = await fetchData(
-    `/movie/${movieId}/keywords`
-  );
-
-  console.log(data);
-  return data;
-};
-
-export const getTVKeywords = async (tvShowId) => {
-  const data = await fetchData(
-    `/tv/${tvShowId}/keywords`
-  );
-
-  console.log(data);
-  return data;
-};
-
-/* =========================
-   Reviews
-========================= */
-
-export const getMovieReviews = async (movieId) => {
-  const data = await fetchData(
-    `/movie/${movieId}/reviews`
-  );
-
-  console.log(data);
-  return data;
-};
-
-export const getTVReviews = async (tvShowId) => {
-  const data = await fetchData(
-    `/tv/${tvShowId}/reviews`
-  );
-
-  console.log(data);
-  return data;
-};
-
-/* =========================
    External IDs
 ========================= */
 
@@ -163,28 +97,3 @@ export const getTVExternalIds = async (tvShowId) => {
   return data;
 };
 
-/* =========================
-   Movie Release Dates
-========================= */
-
-export const getMovieReleaseDates = async (movieId) => {
-  const data = await fetchData(
-    `/movie/${movieId}/release_dates`
-  );
-
-  console.log(data);
-  return data;
-};
-
-/* =========================
-   TV Content Ratings
-========================= */
-
-export const getTVContentRatings = async (tvShowId) => {
-  const data = await fetchData(
-    `/tv/${tvShowId}/content_ratings`
-  );
-
-  console.log(data);
-  return data;
-};

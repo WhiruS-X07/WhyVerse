@@ -1,17 +1,18 @@
-import React from 'react'
-import { Outlet } from 'react-router-dom'
-import { Header, Footer } from '../pages/pages'
+import { Outlet } from "react-router-dom";
+import { Header, Footer } from "../pages/pages";
 
 const Layout = () => {
   return (
-    <div className='min-h-screen bg-[#000000] text-white'>
+    <div className="flex min-h-screen flex-col bg-black text-white">
       <Header />
-      <main>
+
+      <main className="flex-1">
         <Outlet />
       </main>
+
       <Footer />
     </div>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;

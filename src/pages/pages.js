@@ -6,5 +6,6 @@ import People from "./People";
 import TVShows from "./TVShows";
 import Details from "./Details";
 import PersonDetails from "./PersonDetails";
+import View from "./View";
 
-export { Home, Header, Footer, Movies, People, TVShows, Details, PersonDetails };
+export { Home, Header, Footer, Movies, People, TVShows, Details, PersonDetails, View };

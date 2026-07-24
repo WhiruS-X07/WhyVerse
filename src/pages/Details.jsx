@@ -1,20 +1,57 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { getMovieDetails, getTVDetails } from "../services/Details";
-
+import {
+  getMovieDetails,
+  getTVDetails,
+  getMovieCollection,
+  getMovieWatchProviders,
+  getTVWatchProviders,
+  getMovieExternalIds,
+  getTVExternalIds,
+} from "../services/Details";
 const Details = () => {
   const { type, id } = useParams();
 
   const [data, setData] = useState(null);
+  const [collection, setCollection] = useState(null);
+  const [watchProviders, setWatchProviders] = useState(null);
+  const [externalIds, setExternalIds] = useState(null);
+  const [showTrailer, setShowTrailer] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
       try {
+        // Main details
         const details =
           type === "movie" ? await getMovieDetails(id) : await getTVDetails(id);
 
         setData(details);
+
+        // Collection (Movies only)
+        if (type === "movie" && details.belongs_to_collection) {
+          const collectionData = await getMovieCollection(
+            details.belongs_to_collection.id,
+          );
+
+          setCollection(collectionData);
+        }
+
+        // Watch Providers
+        const providers =
+          type === "movie"
+            ? await getMovieWatchProviders(id)
+            : await getTVWatchProviders(id);
+
+        setWatchProviders(providers);
+
+        // External IDs
+        const ids =
+          type === "movie"
+            ? await getMovieExternalIds(id)
+            : await getTVExternalIds(id);
+
+        setExternalIds(ids);
       } catch (error) {
         console.error(error);
       }
@@ -31,6 +68,10 @@ const Details = () => {
     );
   }
 
+  // Find the first official YouTube trailer
+  const trailer = data?.videos?.results?.find(
+    (video) => video.site === "YouTube" && video.type === "Trailer",
+  );
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Hero */}
@@ -194,17 +235,22 @@ const Details = () => {
                 </a>
               )}
 
-              <button className="flex items-center gap-2 rounded-2xl border border-zinc-700 bg-zinc-900/70 px-8 py-4 font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-orange-500 hover:bg-orange-500 hover:text-black">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  className="h-5 w-5"
+              {trailer && (
+                <button
+                  onClick={() => setShowTrailer(true)}
+                  className="flex items-center gap-2 rounded-2xl border border-zinc-700 bg-zinc-900/70 px-8 py-4 font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-orange-500 hover:bg-orange-500 hover:text-black"
                 >
-                  <path d="M8 5.14v13.72a1 1 0 001.53.85l10.28-6.86a1 1 0 000-1.66L9.53 4.29A1 1 0 008 5.14z" />
-                </svg>
-                Watch Trailer
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                    className="h-5 w-5"
+                  >
+                    <path d="M8 5.14v13.72a1 1 0 001.53.85l10.28-6.86a1 1 0 000-1.66L9.53 4.29A1 1 0 008 5.14z" />
+                  </svg>
+                  Watch Trailer
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -224,22 +270,23 @@ const Details = () => {
 
               <div className="mt-3 mb-8 h-1 w-24 rounded-full bg-orange-500"></div>
 
-              <p className="text-lg leading-9 text-gray-300">{data.overview}</p>
+              <p className="text-lg leading-9 text-gray-300">
+                {data.overview || "No story overview available."}
+              </p>
             </section>
 
-            {/* At a Glance */}
+            {/* Quick Facts */}
             <section>
               <h2 className="text-4xl font-black">
-                <span className="text-white">At a</span>{" "}
-                <span className="text-orange-500">Glance</span>
+                <span className="text-white">Quick</span>{" "}
+                <span className="text-orange-500">Facts</span>
               </h2>
 
               <div className="mt-3 mb-8 h-1 w-24 rounded-full bg-orange-500"></div>
 
               <div className="grid gap-5 md:grid-cols-2">
                 {/* Status */}
-
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6">
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6 transition-all duration-300 hover:border-orange-500">
                   <div className="flex items-center gap-3">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -264,9 +311,46 @@ const Details = () => {
                   <h3 className="mt-4 text-xl font-bold">{data.status}</h3>
                 </div>
 
-                {/* Language */}
+                {/* Collection / Seasons */}
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6 transition-all duration-300 hover:border-orange-500">
+                  <div className="flex items-center gap-3">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-orange-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <rect
+                        x="4"
+                        y="6"
+                        width="16"
+                        height="12"
+                        rx="2"
+                        strokeWidth={2}
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 6V4h8v2"
+                      />
+                    </svg>
 
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6">
+                    <p className="text-sm uppercase tracking-widest text-gray-400">
+                      {type === "movie" ? "Collection" : "Seasons"}
+                    </p>
+                  </div>
+
+                  <h3 className="mt-4 text-xl font-bold">
+                    {type === "movie"
+                      ? data.belongs_to_collection?.name || "Standalone Movie"
+                      : data.number_of_seasons}
+                  </h3>
+                </div>
+
+                {/* Country / Network */}
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6 transition-all duration-300 hover:border-orange-500">
                   <div className="flex items-center gap-3">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -279,23 +363,29 @@ const Details = () => {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M3 5h18M9 3v2m6-2v2M5 9h14M5 15h14M9 21h6"
+                        d="M3 12h18M12 3v18"
                       />
+                      <circle cx="12" cy="12" r="9" strokeWidth={2} />
                     </svg>
 
                     <p className="text-sm uppercase tracking-widest text-gray-400">
-                      Language
+                      {type === "movie" ? "Country" : "Network"}
                     </p>
                   </div>
 
                   <h3 className="mt-4 text-xl font-bold">
-                    {data.original_language.toUpperCase()}
+                    {type === "movie"
+                      ? data.production_countries
+                          ?.map((country) => country.name)
+                          .join(", ") || "N/A"
+                      : data.networks
+                          ?.map((network) => network.name)
+                          .join(", ") || "N/A"}
                   </h3>
                 </div>
 
-                {/* Release */}
-
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6">
+                {/* Languages / Episodes */}
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6 transition-all duration-300 hover:border-orange-500">
                   <div className="flex items-center gap-3">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -308,363 +398,238 @@ const Details = () => {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v13a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"
+                        d="M21 12A9 9 0 113 12a9 9 0 0118 0zm-9-9c2.5 2.5 4 5.8 4 9s-1.5 6.5-4 9m0-18C9.5 5.5 8 8.8 8 12s1.5 6.5 4 9"
                       />
                     </svg>
 
                     <p className="text-sm uppercase tracking-widest text-gray-400">
-                      {type === "movie" ? "Release Date" : "First Air Date"}
+                      {type === "movie" ? "Languages" : "Episodes"}
                     </p>
                   </div>
 
                   <h3 className="mt-4 text-xl font-bold">
-                    {data.release_date || data.first_air_date}
-                  </h3>
-                </div>
-
-                {/* Runtime */}
-
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6">
-                  <div className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-orange-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <circle cx="12" cy="12" r="9" strokeWidth="2" />
-                      <path
-                        d="M12 7v5l3 2"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-
-                    <p className="text-sm uppercase tracking-widest text-gray-400">
-                      {type === "movie" ? "Runtime" : "Episode Runtime"}
-                    </p>
-                  </div>
-
-                  <h3 className="mt-4 text-xl font-bold">
-                    {data.runtime || data.episode_run_time?.[0]} min
+                    {type === "movie"
+                      ? data.spoken_languages
+                          ?.map((lang) => lang.english_name)
+                          .join(", ") || "N/A"
+                      : data.number_of_episodes}
                   </h3>
                 </div>
               </div>
             </section>
 
-            {/* Details */}
-
+            {/* Production Details */}
             <section>
               <h2 className="text-4xl font-black">
-                <span className="text-white">Behind the </span>
-                <span className="text-orange-500">Screen</span>
+                <span className="text-white">Production </span>
+                <span className="text-orange-500">Details</span>
               </h2>
 
               <div className="mt-3 mb-8 h-1 w-24 rounded-full bg-orange-500"></div>
 
-              <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-800/80">
-                {/* MOVIE */}
-                {type === "movie" && (
+              <div className="grid gap-5 md:grid-cols-2">
+                {type === "movie" ? (
                   <>
                     {/* Budget */}
-                    <div className="flex items-center justify-between border-b border-zinc-800 p-6">
-                      <div>
-                        <p className="text-sm uppercase tracking-widest text-gray-500">
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6 hover:border-orange-500 transition-all">
+                      <div className="flex items-center gap-3">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6 text-orange-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 8c-2 0-3 1-3 2s1 2 3 2 3 1 3 2-1 2-3 2m0-10v10"
+                          />
+                        </svg>
+
+                        <p className="text-sm uppercase tracking-widest text-gray-400">
                           Budget
                         </p>
-
-                        <h3 className="mt-2 text-xl font-bold">
-                          {data.budget
-                            ? `$${data.budget.toLocaleString()}`
-                            : "N/A"}
-                        </h3>
                       </div>
 
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8 text-orange-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8c-2 0-3 1-3 2s1 2 3 2 3 1 3 2-1 2-3 2m0-10v10m0-10V6m0 12v2"
-                        />
-                      </svg>
+                      <h3 className="mt-4 text-2xl font-bold">
+                        {data.budget
+                          ? `$${data.budget.toLocaleString()}`
+                          : "Not Available"}
+                      </h3>
                     </div>
 
                     {/* Revenue */}
-                    <div className="flex items-center justify-between border-b border-zinc-800 p-6">
-                      <div>
-                        <p className="text-sm uppercase tracking-widest text-gray-500">
-                          Revenue
-                        </p>
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6 hover:border-orange-500 transition-all">
+                      <div className="flex items-center gap-3">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6 text-orange-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 12h14M12 5l7 7-7 7"
+                          />
+                        </svg>
 
-                        <h3 className="mt-2 text-xl font-bold">
-                          {data.revenue
-                            ? `$${data.revenue.toLocaleString()}`
-                            : "N/A"}
-                        </h3>
+                        <p className="text-sm uppercase tracking-widest text-gray-400">
+                          Box Office
+                        </p>
                       </div>
 
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8 text-orange-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 12h14M12 5l7 7-7 7"
-                        />
-                      </svg>
+                      <h3 className="mt-4 text-2xl font-bold">
+                        {data.revenue
+                          ? `$${data.revenue.toLocaleString()}`
+                          : "Not Available"}
+                      </h3>
                     </div>
 
-                    {/* Collection */}
-                    <div className="flex items-center justify-between border-b border-zinc-800 p-6">
-                      <div>
-                        <p className="text-sm uppercase tracking-widest text-gray-500">
-                          Collection
-                        </p>
+                    {/* Homepage */}
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6 hover:border-orange-500 transition-all">
+                      <div className="flex items-center gap-3">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6 text-orange-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                          <path
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            d="M3 12h18M12 3c3 3 5 6 5 9s-2 6-5 9c-3-3-5-6-5-9s2-6 5-9z"
+                          />
+                        </svg>
 
-                        <h3 className="mt-2 text-xl font-bold">
-                          {data.belongs_to_collection?.name ||
-                            "Standalone Movie"}
-                        </h3>
+                        <p className="text-sm uppercase tracking-widest text-gray-400">
+                          Official Site
+                        </p>
                       </div>
 
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8 text-orange-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <rect
-                          x="4"
-                          y="6"
-                          width="16"
-                          height="12"
-                          rx="2"
-                          strokeWidth={2}
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 6V4h8v2"
-                        />
-                      </svg>
+                      {data.homepage ? (
+                        <a
+                          href={data.homepage}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-4 inline-block font-semibold text-orange-500 hover:underline"
+                        >
+                          Visit Website →
+                        </a>
+                      ) : (
+                        <h3 className="mt-4 text-xl font-bold">
+                          Not Available
+                        </h3>
+                      )}
                     </div>
 
                     {/* IMDb */}
-                    <div className="flex items-center justify-between p-6">
-                      <div>
-                        <p className="text-sm uppercase tracking-widest text-gray-500">
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6 hover:border-orange-500 transition-all">
+                      <div className="flex items-center gap-3">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6 text-orange-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M14 3h7v7m0-7L10 14m-4-7H3v14h14v-3"
+                          />
+                        </svg>
+
+                        <p className="text-sm uppercase tracking-widest text-gray-400">
                           IMDb
                         </p>
+                      </div>
 
+                      {data.imdb_id ? (
                         <a
                           href={`https://www.imdb.com/title/${data.imdb_id}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="mt-2 inline-block text-xl font-bold text-orange-500 hover:underline"
+                          className="mt-4 inline-block font-semibold text-orange-500 hover:underline"
                         >
-                          View Movie →
+                          View on IMDb →
                         </a>
-                      </div>
-
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8 text-orange-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M14 3h7v7m0-7L10 14m-4-7H3v14h14v-3"
-                        />
-                      </svg>
+                      ) : (
+                        <h3 className="mt-4 text-xl font-bold">
+                          Not Available
+                        </h3>
+                      )}
                     </div>
                   </>
-                )}
-
-                {/* TV */}
-                {type === "tv" && (
+                ) : (
                   <>
-                    {/* Seasons */}
-                    <div className="flex items-center justify-between border-b border-zinc-800 p-6">
-                      <div>
-                        <p className="text-sm uppercase tracking-widest text-gray-500">
-                          Seasons
-                        </p>
+                    {/* Created By */}
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6 hover:border-orange-500 transition-all">
+                      <p className="text-sm uppercase tracking-widest text-gray-400">
+                        Created By
+                      </p>
 
-                        <h3 className="mt-2 text-xl font-bold">
-                          {data.number_of_seasons}
-                        </h3>
-                      </div>
-
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8 text-orange-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <rect
-                          x="3"
-                          y="5"
-                          width="18"
-                          height="14"
-                          rx="2"
-                          strokeWidth={2}
-                        />
-                        <path
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                          d="M7 9h10M7 15h6"
-                        />
-                      </svg>
-                    </div>
-
-                    {/* Episodes */}
-                    <div className="flex items-center justify-between border-b border-zinc-800 p-6">
-                      <div>
-                        <p className="text-sm uppercase tracking-widest text-gray-500">
-                          Episodes
-                        </p>
-
-                        <h3 className="mt-2 text-xl font-bold">
-                          {data.number_of_episodes}
-                        </h3>
-                      </div>
-
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8 text-orange-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <rect
-                          x="3"
-                          y="4"
-                          width="18"
-                          height="16"
-                          rx="2"
-                          strokeWidth={2}
-                        />
-                        <polygon
-                          points="10,8 16,12 10,16"
-                          strokeWidth={2}
-                          fill="none"
-                        />
-                      </svg>
-                    </div>
-
-                    {/* Last Air Date */}
-                    <div className="flex items-center justify-between border-b border-zinc-800 p-6">
-                      <div>
-                        <p className="text-sm uppercase tracking-widest text-gray-500">
-                          Last Air Date
-                        </p>
-
-                        <h3 className="mt-2 text-xl font-bold">
-                          {data.last_air_date}
-                        </h3>
-                      </div>
-
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8 text-orange-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <rect
-                          x="4"
-                          y="5"
-                          width="16"
-                          height="15"
-                          rx="2"
-                          strokeWidth={2}
-                        />
-                        <path
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                          d="M8 3v4M16 3v4M4 10h16"
-                        />
-                      </svg>
+                      <h3 className="mt-4 text-xl font-bold">
+                        {data.created_by?.map((c) => c.name).join(", ") ||
+                          "Not Available"}
+                      </h3>
                     </div>
 
                     {/* Network */}
-                    <div className="flex items-center justify-between border-b border-zinc-800 p-6">
-                      <div>
-                        <p className="text-sm uppercase tracking-widest text-gray-500">
-                          Network
-                        </p>
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6 hover:border-orange-500 transition-all">
+                      <p className="text-sm uppercase tracking-widest text-gray-400">
+                        Network
+                      </p>
 
-                        <h3 className="mt-2 text-xl font-bold">
-                          {data.networks
-                            ?.map((network) => network.name)
-                            .join(", ") || "N/A"}
-                        </h3>
-                      </div>
-
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8 text-orange-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <circle cx="12" cy="12" r="3" strokeWidth={2} />
-                        <path
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                          d="M4 12a8 8 0 0116 0M7 12a5 5 0 0110 0"
-                        />
-                      </svg>
+                      <h3 className="mt-4 text-xl font-bold">
+                        {data.networks?.map((n) => n.name).join(", ") ||
+                          "Not Available"}
+                      </h3>
                     </div>
 
-                    {/* Created By */}
-                    <div className="flex items-center justify-between p-6">
-                      <div>
-                        <p className="text-sm uppercase tracking-widest text-gray-500">
-                          Created By
-                        </p>
+                    {/* Last Air Date */}
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6 hover:border-orange-500 transition-all">
+                      <p className="text-sm uppercase tracking-widest text-gray-400">
+                        Last Air Date
+                      </p>
 
-                        <h3 className="mt-2 text-xl font-bold">
-                          {data.created_by
-                            ?.map((creator) => creator.name)
-                            .join(", ") || "N/A"}
+                      <h3 className="mt-4 text-xl font-bold">
+                        {data.last_air_date || "Not Available"}
+                      </h3>
+                    </div>
+
+                    {/* Homepage */}
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-800/80 p-6 hover:border-orange-500 transition-all">
+                      <p className="text-sm uppercase tracking-widest text-gray-400">
+                        Official Site
+                      </p>
+
+                      {data.homepage ? (
+                        <a
+                          href={data.homepage}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-4 inline-block font-semibold text-orange-500 hover:underline"
+                        >
+                          Visit Website →
+                        </a>
+                      ) : (
+                        <h3 className="mt-4 text-xl font-bold">
+                          Not Available
                         </h3>
-                      </div>
-
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8 text-orange-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <circle cx="12" cy="8" r="4" strokeWidth={2} />
-                        <path
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                          d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"
-                        />
-                      </svg>
+                      )}
                     </div>
                   </>
                 )}
@@ -724,9 +689,103 @@ const Details = () => {
                 ))}
               </div>
             </section>
+
+            {/* Top Cast */}
+            <section>
+              <h2 className="text-4xl font-black">
+                <span className="text-white">Top </span>
+                <span className="text-orange-500">Cast</span>
+              </h2>
+
+              <div className="mt-3 mb-8 h-1 w-24 rounded-full bg-orange-500"></div>
+
+              {data.credits?.cast?.length ? (
+                <div className=" flex gap-8 overflow-x-auto pt-2 pb-4 scrollbar-hide">
+                  {data.credits.cast.slice(0, 12).map((actor) => (
+                    <div
+                      key={actor.id}
+                      className="w-32 flex-shrink-0 text-center"
+                    >
+                      {actor.profile_path ? (
+                        <img
+                          src={`https://image.tmdb.org/t/p/w300${actor.profile_path}`}
+                          alt={actor.name}
+                          className="mx-auto h-28 w-28 rounded-full border-2 border-zinc-700 object-cover transition-all duration-300 hover:border-orange-500 hover:scale-105"
+                        />
+                      ) : (
+                        <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full border-2 border-zinc-700 bg-zinc-800 transition-all duration-300 hover:border-orange-500">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-12 w-12 text-orange-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <circle cx="12" cy="8" r="4" strokeWidth={2} />
+                            <path
+                              strokeWidth={2}
+                              strokeLinecap="round"
+                              d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"
+                            />
+                          </svg>
+                        </div>
+                      )}
+
+                      <h3 className="mt-4 line-clamp-2 text-sm font-bold">
+                        {actor.name}
+                      </h3>
+
+                      <p className="mt-1 line-clamp-2 text-xs text-gray-400">
+                        {actor.character || "Unknown Character"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-gray-400">
+                  No cast information available.
+                </p>
+              )}
+            </section>
+
+
+
+
+
+
+
+
           </aside>
         </div>
       </section>
+      {showTrailer && trailer && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6"
+          onClick={() => setShowTrailer(false)}
+        >
+          <div
+            className="relative w-full max-w-5xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowTrailer(false)}
+              className="absolute -top-12 right-0 text-3xl font-bold text-white hover:text-orange-500"
+            >
+              ✕
+            </button>
+
+            <div className="aspect-video overflow-hidden rounded-2xl">
+              <iframe
+                className="h-full w-full"
+                src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1`}
+                title={trailer.name}
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

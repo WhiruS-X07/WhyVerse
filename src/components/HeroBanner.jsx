@@ -5,8 +5,10 @@ const HeroBanner = ({ items = [] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // Show only the first 5 featured items
   const featuredItems = items.slice(0, 5);
 
+  // Keep the current index valid if the featured items change
   useEffect(() => {
     if (featuredItems.length && currentIndex >= featuredItems.length) {
       setCurrentIndex(0);
@@ -23,15 +25,13 @@ const HeroBanner = ({ items = [] }) => {
   };
 
   const nextItem = () => {
+    if (!featuredItems.length) return;
+
     changeItem((currentIndex + 1) % featuredItems.length);
   };
 
-  const prevItem = () => {
-    changeItem(
-      currentIndex === 0 ? featuredItems.length - 1 : currentIndex - 1,
-    );
-  };
 
+  // Auto-slide every 5 seconds
   useEffect(() => {
     if (!featuredItems.length) return;
 
@@ -42,8 +42,8 @@ const HeroBanner = ({ items = [] }) => {
 
   if (!featuredItems.length) {
     return (
-      <div className="flex h-[75vh] items-center justify-center text-xl text-white">
-        Loading...
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#EF5D12] border-t-transparent sm:h-12 sm:w-12"></div>
       </div>
     );
   }
@@ -52,7 +52,7 @@ const HeroBanner = ({ items = [] }) => {
 
   return (
     <div className="relative">
-      <section className="relative h-[85vh] overflow-hidden rounded-3xl">
+      <section className="relative h-[65vh] overflow-hidden rounded-2xl sm:h-[75vh] lg:h-[85vh] lg:rounded-3xl">
         {/* Background */}
         <img
           src={
@@ -72,7 +72,7 @@ const HeroBanner = ({ items = [] }) => {
 
         {/* Hero */}
         <div
-          className={`relative z-10 flex h-full items-center justify-between px-12 xl:px-16 transition-all duration-500 ${
+          className={`relative z-10 flex h-full items-center justify-between px-4 sm:px-8 lg:px-12 xl:px-16 transition-all duration-500 ${
             isAnimating
               ? "translate-y-5 opacity-0"
               : "translate-y-0 opacity-100"
@@ -81,7 +81,7 @@ const HeroBanner = ({ items = [] }) => {
           {/* LEFT */}
           <div className="max-w-3xl text-white">
             {/* Featured Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/40 bg-zinc-900/70 px-5 py-2 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/40 bg-zinc-900/70 px-3 py-1.5 backdrop-blur-md sm:px-5 sm:py-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -91,41 +91,42 @@ const HeroBanner = ({ items = [] }) => {
                 <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
               </svg>
 
-              <span className="text-sm font-semibold">Featured</span>
+              <span className="text-xs font-semibold sm:text-sm">Featured</span>
             </div>
 
             {/* Title */}
-            <h1 className="mt-6 text-5xl font-black leading-tight lg:text-6xl xl:text-7xl">
+            <h1 className="mt-5 text-3xl font-black leading-tight sm:text-4xl lg:mt-6 lg:text-5xl xl:text-6xl 2xl:text-7xl">
               {currentItem.title || currentItem.name}
             </h1>
 
             {/* Info Badges */}
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="mt-6 flex flex-wrap gap-3 lg:mt-8 lg:gap-4">
               {/* Rating */}
-              <div className="flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/70 px-5 py-3 backdrop-blur-md">
+              <div className="flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/70 px-3 py-2 backdrop-blur-md sm:px-5 sm:py-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
                   viewBox="0 0 24 24"
-                  className="h-5 w-5 text-orange-500"
+                  className="h-4 w-4 text-orange-500 sm:h-5 sm:w-5"
                 >
                   <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                 </svg>
 
-                <span className="font-medium">
-                  {currentItem.vote_average.toFixed(1)}
+                <span className="text-sm font-medium sm:text-base">
+                  {currentItem.vote_average?.toFixed(1) ?? "N/A"}
                 </span>
               </div>
 
               {/* Release Date */}
-              <div className="flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/70 px-5 py-3 backdrop-blur-md">
+              {/* Release Date */}
+              <div className="flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/70 px-3 py-2 backdrop-blur-md sm:px-5 sm:py-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
                   viewBox="0 0 24 24"
-                  className="h-5 w-5 text-orange-500"
+                  className="h-4 w-4 text-orange-500 sm:h-5 sm:w-5"
                 >
                   <path
                     strokeLinecap="round"
@@ -134,20 +135,22 @@ const HeroBanner = ({ items = [] }) => {
                   />
                 </svg>
 
-                <span>
-                  {currentItem.release_date || currentItem.first_air_date}
+                <span className="text-sm sm:text-base">
+                  {currentItem.release_date ||
+                    currentItem.first_air_date ||
+                    "Unknown"}
                 </span>
               </div>
 
               {/* Language */}
-              <div className="flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/70 px-5 py-3 backdrop-blur-md">
+              <div className="flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/70 px-3 py-2 backdrop-blur-md sm:px-5 sm:py-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
                   viewBox="0 0 24 24"
-                  className="h-5 w-5 text-orange-500"
+                  className="h-4 w-4 text-orange-500 sm:h-5 sm:w-5"
                 >
                   <circle cx="12" cy="12" r="9" />
                   <path
@@ -157,47 +160,44 @@ const HeroBanner = ({ items = [] }) => {
                   />
                 </svg>
 
-                <span className="uppercase">
-                  {currentItem.original_language}
+                <span className="text-sm uppercase sm:text-base">
+                  {currentItem.original_language || "N/A"}
                 </span>
               </div>
             </div>
 
             {/* Overview */}
-            <p className="mt-8 max-w-2xl text-lg leading-8 text-zinc-300">
+            <p className="mt-6 max-w-2xl text-sm leading-7 text-zinc-300 sm:mt-8 sm:text-base lg:text-lg lg:leading-8">
               {currentItem.overview || "No overview available."}
             </p>
 
             {/* Button */}
-            <div className="mt-10">
+            <div className="mt-8 lg:mt-10">
               <Link
-                to={`/details/${
-                  currentItem.title ? "movie" : "tv"
-                }/${currentItem.id}`}
+                to={`/details/${currentItem.title ? "movie" : "tv"}/${currentItem.id}`}
+                className="group inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-all duration-300 hover:scale-105 hover:bg-orange-400 hover:shadow-2xl hover:shadow-orange-500/50 sm:px-6 sm:py-3.5 sm:text-base lg:px-8 lg:py-4"
               >
-                <button className="group inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-8 py-4 font-semibold text-white shadow-lg shadow-orange-500/20 transition-all duration-300 hover:scale-105 hover:bg-orange-400 hover:shadow-2xl hover:shadow-orange-500/50">
-                  View Details
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
+                View Details
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 sm:h-5 sm:w-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
               </Link>
             </div>
           </div>
 
           {/* Right */}
-          <div className="hidden lg:flex flex-col gap-4">
+          <div className="hidden lg:flex lg:w-[320px] lg:flex-col lg:gap-4 xl:w-[360px]">
             {featuredItems.map((item, index) => (
               <button
                 key={item.id}
@@ -209,17 +209,21 @@ const HeroBanner = ({ items = [] }) => {
                 }`}
               >
                 <img
-                  src={`https://image.tmdb.org/t/p/w300${item.poster_path}`}
+                  src={
+                    item.poster_path
+                      ? `https://image.tmdb.org/t/p/w300${item.poster_path}`
+                      : "/placeholder.png"
+                  }
                   alt={item.title || item.name}
-                  className="h-24 w-16 rounded-xl object-cover"
+                  className="h-20 w-14 rounded-xl object-cover xl:h-24 xl:w-16"
                 />
 
                 <div className="min-w-0 flex-1">
-                  <h3 className="line-clamp-2 font-bold text-white">
+                  <h3 className="line-clamp-2 text-sm font-bold text-white xl:text-base">
                     {item.title || item.name}
                   </h3>
 
-                  <div className="mt-3 flex items-center gap-2 text-sm text-zinc-300">
+                  <div className="mt-2 flex items-center gap-2 text-xs text-zinc-300 xl:mt-3 xl:text-sm">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -229,7 +233,7 @@ const HeroBanner = ({ items = [] }) => {
                       <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                     </svg>
 
-                    <span>{item.vote_average.toFixed(1)}</span>
+                    <span>{item.vote_average?.toFixed(1) ?? "N/A"}</span>
                   </div>
                 </div>
               </button>
@@ -238,95 +242,20 @@ const HeroBanner = ({ items = [] }) => {
         </div>
 
         {/* Indicators */}
-        <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 gap-3">
+        <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2 sm:bottom-8 sm:gap-3">
           {featuredItems.map((_, index) => (
             <button
               key={index}
               onClick={() => changeItem(index)}
               className={`rounded-full transition-all duration-300 ${
                 index === currentIndex
-                  ? "h-2 w-12 bg-orange-500"
+                  ? "h-2 w-10 bg-orange-500 sm:w-12"
                   : "h-2 w-3 bg-zinc-500 hover:bg-zinc-300"
               }`}
             />
           ))}
         </div>
       </section>
-      {/* Previous */}
-      <button
-        onClick={prevItem}
-        className="
-          absolute
-          -left-20
-          top-1/2
-          z-30
-          flex
-          h-20
-          w-20
-          -translate-y-1/2
-          items-center
-          justify-center
-          bg-transparent
-          text-white/45
-          transition-all
-          duration-300
-          hover:scale-125
-          hover:-translate-x-1
-          hover:text-orange-500
-          hover:drop-shadow-[0_0_20px_rgba(249,115,22,0.8)]
-        "
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          viewBox="0 0 24 24"
-          className="h-10 w-10 transition-transform duration-300"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-      </button>
-
-      {/* Next */}
-      <button
-        onClick={nextItem}
-        className="
-          absolute
-          -right-20
-          top-1/2
-          z-30
-          flex
-          h-20
-          w-20
-          -translate-y-1/2
-          items-center
-          justify-center
-          bg-transparent
-          text-white/45
-          transition-all
-          duration-300
-          hover:scale-125
-          hover:translate-x-1
-          hover:text-orange-500
-          hover:drop-shadow-[0_0_20px_rgba(249,115,22,0.8)]
-        "
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          viewBox="0 0 24 24"
-          className="h-10 w-10 transition-transform duration-300"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
     </div>
   );
 };
