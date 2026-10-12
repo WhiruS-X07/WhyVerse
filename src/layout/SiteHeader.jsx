@@ -61,7 +61,7 @@ const Header = () => {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/90 backdrop-blur-lg">
-        <div className="mx-auto grid h-[4.25rem] max-w-screen-2xl grid-cols-3 items-center px-4 sm:h-[4.5rem] sm:px-6 lg:px-8 xl:flex xl:h-20 xl:justify-between">
+        <div className="mx-auto grid h-[4.25rem] max-w-screen-2xl grid-cols-[1fr_auto] items-center px-4 sm:h-[4.5rem] sm:px-6 lg:px-8 xl:flex xl:h-20 xl:justify-between">
           <Link to="/" aria-label="WhyVerse home" className="flex w-fit items-center justify-self-start xl:shrink-0">
             <img
               src={logo}
@@ -99,16 +99,8 @@ const Header = () => {
           </div>
 
           <Link
-            to="/search"
-            aria-label="Search movies, shows, and people"
-            className="col-start-2 inline-flex h-10 w-10 items-center justify-center justify-self-center rounded-full border border-white/10 bg-white/[0.04] text-zinc-200 transition hover:border-orange-500/50 hover:bg-orange-500/10 hover:text-orange-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 xl:hidden"
-          >
-            <Icon><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></Icon>
-          </Link>
-
-          <Link
             to="/login"
-            className="col-start-3 inline-flex min-h-10 items-center justify-self-end gap-1.5 rounded-full border border-orange-500/30 bg-orange-500/10 px-3 text-sm font-bold text-orange-200 transition hover:border-orange-400/70 hover:bg-orange-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 sm:gap-2 sm:px-4 xl:hidden"
+            className="inline-flex min-h-10 items-center justify-self-end gap-1.5 rounded-full border border-orange-500/30 bg-orange-500/10 px-3 text-sm font-bold text-orange-200 transition hover:border-orange-400/70 hover:bg-orange-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 sm:gap-2 sm:px-4 xl:hidden"
           >
             <LoginIcon />
             <span>Login</span>
