@@ -1,50 +1,67 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 
-import Layout from "./layout/Layout";
-import {
-  Home,
-  Movies,
-  TVShows,
-  People,
-  Details,
-  PersonDetails,
-  View,
-} from "./pages/pages";
+import AppLayout from "./layout/AppLayout";
+import ExplorePage from "./pages/explore/ExplorePage";
+import MoviesPage from "./pages/catalog/MoviesPage";
+import TVShowsPage from "./pages/catalog/TVShowsPage";
+import PeoplePage from "./pages/catalog/PeoplePage";
+import CatalogViewPage from "./pages/catalog/CatalogViewPage";
+import CollectionPage from "./pages/collection/CollectionPage";
+import TitleDetailsPage from "./pages/details/TitleDetailsPage";
+import PersonDetailsPage from "./pages/details/PersonDetailsPage";
+import LoginPage from "./pages/auth/LoginPage";
+import SearchPage from "./pages/search/SearchPage";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: <AppLayout />,
     children: [
       {
         index: true,
-        element: <Home />,
+        element: <ExplorePage />,
       },
       {
         path: "movies",
-        element: <Movies />,
+        element: <MoviesPage />,
       },
       {
         path: "tvshows",
-        element: <TVShows />,
+        element: <TVShowsPage />,
       },
       {
         path: "people",
-        element: <People />,
+        element: <PeoplePage />,
+      },
+      {
+        path: "collection",
+        element: <CollectionPage />,
+      },
+      {
+        path: "search",
+        element: <SearchPage />,
+      },
+      {
+        path: "library",
+        element: <Navigate to="/collection" replace />,
       },
       {
         path: "details/:type/:id",
-        element: <Details />,
+        element: <TitleDetailsPage />,
       },
       {
         path: "person/:id",
-        element: <PersonDetails />,
+        element: <PersonDetailsPage />,
       },
       {
         path: "view/:type/:category",
-        element: <View />,
+        element: <CatalogViewPage />,
       },
     ],
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
   },
 ]);
 
